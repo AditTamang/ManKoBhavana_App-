@@ -53,11 +53,15 @@ builder.Services.AddCors(options =>
 });
 
 // Register the database context with PostgreSQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrEmpty(connectionString))
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("Database Connection String (ConnectionStrings:DefaultConnection) is missing from configuration.");
+    throw new InvalidOperationException("Database connection string is missing.");
 }
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
